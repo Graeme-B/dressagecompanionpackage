@@ -52,14 +52,20 @@ class DressageCompanionState extends State<DressageCompanionPage>
   bool showImage            = true;
   String landscapeImageFile = "assets/images/CrossCountryLandscape.png";
   String portraitImageFile  = "assets/images/CrossCountryPortrait.png";
-  String imageFile2         = "assets/images/z900.png";
-  String imageFile3         = "assets/images/SaturnV.jpeg";
+  // String landscapeImageFile = "packages/dressagecompanionpackage/assets/images/CrossCountryLandscape.png";
+  // String portraitImageFile  = "packages/dressagecompanionpackage/assets/images/CrossCountryPortrait.png";
+  // String imageFile2         = "packages/dressagecompanionpackage/assets/images/z900.png";
+  // String imageFile3         = "packages/dressagecompanionpackage/assets/images/SaturnV.jpeg";
 
   late GlobalKey mapKey;
+  // late ui.Image landscapeImage;
+  // late ui.Image portraitImage;
+  // late ui.Image image2;
+  // late ui.Image image3;
+  late AssetImage img1;
+  late AssetImage img2;
   late ui.Image landscapeImage;
   late ui.Image portraitImage;
-  late ui.Image image2;
-  late ui.Image image3;
 
   static final ChangeNotifier _repaint = ChangeNotifier();
   // static final TrackPainter   _painter = TrackPainter(repaint: _repaint);
@@ -79,25 +85,34 @@ class DressageCompanionState extends State<DressageCompanionPage>
   }
 
   Future <void> init() async {
+    // img1 = AssetImage('assets/images/CrossCountryLandscape.png', package: 'dressagecompanionpackage');
+    // img2 = AssetImage('assets/images/CrossCountryPortrait.png', package: 'dressagecompanionpackage');
+    // landscapeImage = await loadImageFromAsset(img1);
+    // portraitImage = await loadImageFromAsset(img2);
+//    img1.loadImage();
+
     final ByteData dataH = await rootBundle.load(landscapeImageFile);
     landscapeImage = await loadImage(Uint8List.view(dataH.buffer));
     final ByteData dataV = await rootBundle.load(portraitImageFile);
     portraitImage = await loadImage(Uint8List.view(dataV.buffer));
-    final ByteData data2 = await rootBundle.load(imageFile2);
-    image2 = await loadImage(Uint8List.view(data2.buffer));
-    final ByteData data3 = await rootBundle.load(imageFile3);
-    image3 = await loadImage(Uint8List.view(data3.buffer));
+    // final ByteData data2 = await rootBundle.load(imageFile2);
+    // image2 = await loadImage(Uint8List.view(data2.buffer));
+    // final ByteData data3 = await rootBundle.load(imageFile3);
+    // image3 = await loadImage(Uint8List.view(data3.buffer));
     setState(() {
       isImageLoaded = true;
     });
   }
 
-  Widget simpleButton(String prompt, void Function()? action) {
-    return ElevatedButton(
-      onPressed: action,
-      child: Text(prompt),
-    );
-  }
+  // Future<ui.Image> loadImageFromAsset(AssetImage img) async {
+  //   // final Completer<ui.Image> completer = Completer();
+  //   // ui.decodeImageFromList(img, (ui.Image img) {
+  //   //   return completer.complete(img);
+  //   // });
+  //   // return completer.future;
+  //   final Completer<ui.Image> completer = img.loadImage() as Completer<ui.Image>;
+  //   return completer.future;
+  // }
 
   Future<ui.Image> loadImage(Uint8List img) async {
     final Completer<ui.Image> completer = Completer();
@@ -105,6 +120,13 @@ class DressageCompanionState extends State<DressageCompanionPage>
       return completer.complete(img);
     });
     return completer.future;
+  }
+
+  Widget simpleButton(String prompt, void Function()? action) {
+    return ElevatedButton(
+      onPressed: action,
+      child: Text(prompt),
+    );
   }
 
   Widget buildMenu(BuildContext context) {
@@ -228,7 +250,7 @@ class DressageCompanionState extends State<DressageCompanionPage>
               ),
             ],
           ),
-//          mainDisplay(),
+          // mainDisplay(),
           Expanded(
             child: Stack(
                 children: <Widget>[
