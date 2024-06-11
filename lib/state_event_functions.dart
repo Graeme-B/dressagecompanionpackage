@@ -16,20 +16,20 @@ class StateEventFunctions {
   }
 
   void disableMenuItems(var param) {
-    iv.uploadWalkEnabled = false;
-    iv.displayWalksEnabled = false;
+    iv.uploadTestEnabled = false;
+    iv.displayTestsEnabled = false;
     iv.clearDisplayEnabled = false;
   }
 
   void enableMenuItems(var param) {
-    iv.uploadWalkEnabled = true;
-    iv.displayWalksEnabled = true;
+    iv.uploadTestEnabled = true;
+    iv.displayTestsEnabled = true;
     iv.clearDisplayEnabled = true;
   }
 
   Future<void> setOptimumTime(var param) async {
     // Get the current walk
-    final Walk walk                        = await iv.db.getWalk(iv.walkName);
+    final Walk walk                        = await iv.db.getWalk(iv.testName);
     final double metresPerMinute           = (iv.distanceNotifier.value/param)*60;
     double nextMarker                      = metresPerMinute;
     final List<WalkWaypoint> minuteMarkers = [];
@@ -50,10 +50,10 @@ class StateEventFunctions {
     }
 
     // Update the database and reload the walk
-    await iv.db.deleteWaypointsFromWalk(iv.walkName);
-    await iv.db.addWalkWaypoints(iv.walkName,minuteMarkers);
-    await iv.db.updateWalkOptimumDurn(iv.walkName,(param as int)~/60, param%60);
-    addEventToQueue(Constants.EVENT_LOAD_WALK, iv.walkName);
+    await iv.db.deleteWaypointsFromWalk(iv.testName);
+    await iv.db.addWalkWaypoints(iv.testName,minuteMarkers);
+    await iv.db.updateWalkOptimumDurn(iv.testName,(param as int)~/60, param%60);
+    addEventToQueue(Constants.EVENT_LOAD_TEST, iv.testName);
   }
 
 }

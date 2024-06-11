@@ -3,22 +3,22 @@ import "package:flutter/material.dart";
 import "package:gps_tracker_db/gps_tracker_db.dart";
 import "constants.dart";
 
-class WalkWindow extends StatefulWidget {
-  const WalkWindow({Key? key, required this.currentWalkName}) : super(key: key);
-  final String currentWalkName;
+class TestWindow extends StatefulWidget {
+  const TestWindow({Key? key, required this.currentTestName}) : super(key: key);
+  final String currentTestName;
   @override
-  State<WalkWindow> createState() => _WalkWindowState(currentWalkName: currentWalkName);
+  State<TestWindow> createState() => _TestWindowState(currentTestName: currentTestName);
 }
 
-class _WalkWindowState extends State<WalkWindow> {
+class _TestWindowState extends State<TestWindow> {
 
-  _WalkWindowState({required this.currentWalkName});
+  _TestWindowState({required this.currentTestName});
   late DatabaseHelper db;
   List<String> items          = [];
   var selectedItem            = 0;
-  bool currentWalkNameChanged = false;
-  bool currentWalkDeleted     = false;
-  late String currentWalkName;
+  bool currentTestNameChanged = false;
+  bool currentTestDeleted     = false;
+  late String currentTestName;
 
   @override
   @protected
@@ -44,10 +44,10 @@ class _WalkWindowState extends State<WalkWindow> {
   }
 
   Future<bool> _onBackPressed() {
-    if (currentWalkNameChanged) {
-      Navigator.of(context, rootNavigator: true).pop(currentWalkName);
+    if (currentTestNameChanged) {
+      Navigator.of(context, rootNavigator: true).pop(currentTestName);
       return Future(() => false);
-    } else if (currentWalkDeleted) {
+    } else if (currentTestDeleted) {
       Navigator.of(context, rootNavigator: true).pop("");
       return Future(() => false);
     }
@@ -68,7 +68,7 @@ class _WalkWindowState extends State<WalkWindow> {
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: const Text(Constants.WALK_WINDOW_TITLE),
+        title: const Text(Constants.TEST_WINDOW_TITLE),
       ),
       body:
       Center(
@@ -122,11 +122,11 @@ class _WalkWindowState extends State<WalkWindow> {
                   onPressed: items.isNotEmpty ? () async {
                     if (items.isNotEmpty && selectedItem < items.length) {
                       final String result = await yesNoDialog(
-                          Constants.PROMPT_DELETE_WALK);
+                          Constants.PROMPT_DELETE_TEST);
                       if (result == "yes") {
-                        if (currentWalkName == items[selectedItem]) {
-                          currentWalkName    = "";
-                          currentWalkDeleted = true;
+                        if (currentTestName == items[selectedItem]) {
+                          currentTestName    = "";
+                          currentTestDeleted = true;
                         }
                         await db.deleteWalk(items[selectedItem]);
                       }
@@ -182,11 +182,11 @@ class _WalkWindowState extends State<WalkWindow> {
 // 2) Walk name must not be blank
                     try {
                       if (nameController.text.isEmpty || nameController.text.trim().isEmpty) {
-                        throw Exception(Constants.ERR_WALK_NAME_INVALID);
+                        throw Exception(Constants.ERR_TEST_NAME_INVALID);
                       }
-                      if (currentWalkName == items[selectedItem]) {
-                        currentWalkName        = nameController.text;
-                        currentWalkNameChanged = true;
+                      if (currentTestName == items[selectedItem]) {
+                        currentTestName        = nameController.text;
+                        currentTestNameChanged = true;
                       }
                       await db.updateWalkName(items[selectedItem], nameController.text);
                       repopulateList();

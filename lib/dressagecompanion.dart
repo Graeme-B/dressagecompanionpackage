@@ -7,7 +7,7 @@ import "package:dressagecompanionpackage/state_event.dart";
 import "package:dressagecompanionpackage/state_event_functions_interface.dart";
 import "package:dressagecompanionpackage/upload_results.dart";
 import "package:dressagecompanionpackage/utils.dart";
-import "package:dressagecompanionpackage/walk_window.dart";
+import "package:dressagecompanionpackage/test_window.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:google_mobile_ads/google_mobile_ads.dart";
@@ -108,11 +108,10 @@ class DressageCompanionState
       _loadBannerAds();
     }
 
-//    _stateEvent.addEventToQueue(Constants.EVENT_STARTUP, null);
+    _stateEvent.addEventToQueue(Constants.EVENT_STARTUP, null);
   }
 
   Future <void> init() async {
-    print("Init");
     final ByteData dataH = await rootBundle.load(_iv.landscapeImageFile);
     landscapeImage = await loadImage(Uint8List.view(dataH.buffer));
     final ByteData dataV = await rootBundle.load(_iv.portraitImageFile);
@@ -185,19 +184,19 @@ class DressageCompanionState
     super.dispose();
   }
 
-  // @override
-  // void didChangeAppLifecycleState(AppLifecycleState state) {
-  //   if (state == AppLifecycleState.resumed) {
-  //     GpsTracker.checkForLocationPermissionChanges();
-  //     _stateEvent.addEventToQueue(Constants.EVENT_SWITCH_TO_FOREGROUND, null);
-  //   } else if(state == AppLifecycleState.paused) {
-  //     _stateEvent.addEventToQueue(Constants.EVENT_SWITCH_TO_BACKGROUND, null);
-  //     // } else if(lifecycleState == AppLifecycleState.inactive) {
-  //     //   print("didChangeAppLifecycleState Inactive");
-  //     // } else if(lifecycleState == AppLifecycleState.detached) {
-  //     //   print("didChangeAppLifecycleState Detached");
-  //   }
-  // }
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      GpsTracker.checkForLocationPermissionChanges();
+      _stateEvent.addEventToQueue(Constants.EVENT_SWITCH_TO_FOREGROUND, null);
+    } else if(state == AppLifecycleState.paused) {
+      _stateEvent.addEventToQueue(Constants.EVENT_SWITCH_TO_BACKGROUND, null);
+      // } else if(lifecycleState == AppLifecycleState.inactive) {
+      //   print("didChangeAppLifecycleState Inactive");
+      // } else if(lifecycleState == AppLifecycleState.detached) {
+      //   print("didChangeAppLifecycleState Detached");
+    }
+  }
 
   @override
   void actOnPermissions(var permission) {
@@ -299,22 +298,75 @@ class DressageCompanionState
     return Row(children: controls);
   }
 
+  PopupMenuItem<String> loginMenuItem() {
+    return PopupMenuItem<String>(
+        value: Constants.EVENT_LOGIN,
+        enabled: true,
+        child: const Text(Constants.MENU_PROMPT_LOGIN));
+  }
+
   Widget buildMenu(BuildContext context) {
     return PopupMenuButton<String>(
       onSelected: (String result) {
+        _stateEvent.addEventToQueue(result, null);
       },
       itemBuilder: (BuildContext context) =>
       <PopupMenuEntry<String>>[
         PopupMenuItem<String>(
-          value: "Menu Item 1",
-          child: const Text("Select menu item 1"),
+          value: Constants.EVENT_DISPLAY_TESTS,
+          enabled: _iv.displayTestsEnabled,
+          child: const Text(Constants.MENU_PROMPT_TESTS),
+        ),
+        PopupMenuItem<String>(
+          value: Constants.EVENT_CLEAR_DISPLAY,
+          enabled: _iv.clearDisplayEnabled,
+          child: const Text(Constants.MENU_PROMPT_CLEAR_DISPLAY),
         ),
         const PopupMenuDivider(),
         PopupMenuItem<String>(
-          value: "Menu Item 2",
-          child: const Text("Select menu item 2"),
+          value: Constants.EVENT_SHOW_UPLOAD_TEST_DIALOG,
+          enabled: _iv.uploadTestEnabled,
+          child: const Text(Constants.MENU_PROMPT_UPLOAD),
+        ),
+        PopupMenuItem<String>(
+          value: Constants.EVENT_LOGIN,
+          enabled: true,
+          child: const Text(Constants.MENU_PROMPT_LOGIN),
+        ),
+
+        const PopupMenuDivider(),
+        const PopupMenuItem<String>(
+          value: Constants.EVENT_CREATE_DEBUG_TESTS,
+          child: Text(Constants.MENU_PROMPT_DEBUG_TESTS),
+        ),
+        const PopupMenuItem<String>(
+          value: Constants.EVENT_DEBUG,
+          child: Text(Constants.MENU_PROMPT_DEBUG),
+        ),
+        const PopupMenuItem<String>(
+          value: Constants.EVENT_SHOW_GPS_STATUS_DIALOG,
+          child: Text(Constants.MENU_PROMPT_GPS_STATUS),
         ),
       ],
+    );
+  }
+
+  Widget progressBar() {
+    return ValueListenableBuilder(
+        valueListenable: _iv.progressNotifier,
+        builder: (BuildContext context, double d ,Widget? child){
+          return Align(alignment: Alignment.topCenter,
+            child: Container(
+              padding: const EdgeInsets.all(10.0),
+              child: LinearProgressIndicator(
+                // value: animator.value,
+                minHeight: 15.0,
+                value: d,
+                semanticsLabel: "Linear progress indicator",
+              ),
+            ),
+          );
+        }
     );
   }
 
@@ -352,6 +404,8 @@ class DressageCompanionState
                 painter: _painter,
                 child: const Center(),
               ),
+              if (_iv.showProgressBar)
+                progressBar(),
             ]
         ),
       ),
@@ -359,10 +413,21 @@ class DressageCompanionState
   }
 
   Expanded mainDisplay() {
-    return drawImage();
-    // if (showImage)
-    //   return drawImage();
-    // return drawByLine();
+    if (_iv.showImage) {
+      return
+        Expanded(
+          child: Stack(
+            children: <Widget>[
+              CustomPaint(
+                foregroundPainter: ImagePainter(portraitImage: portraitImage,
+                    landscapeImage: landscapeImage),
+                child: Container(),
+              ),
+            ],
+          ),
+        );
+    }
+    return drawByLine();
   }
 
   @override
@@ -377,17 +442,7 @@ class DressageCompanionState
       ),
       body: Column(
         children: <Widget>[
-          // mainDisplay(),
-          Expanded(
-            child: Stack(
-              children: <Widget>[
-                CustomPaint(
-                  foregroundPainter: ImagePainter(portraitImage: portraitImage, landscapeImage: landscapeImage),
-                  child: Container(),
-                ),
-              ],
-            ),
-          ),
+          mainDisplay(),
           buildButtons(),
         ],
       ),
@@ -515,21 +570,7 @@ class DressageCompanionState
                     SizedBox(
                       height: 45,
                       width:  100,
-                      child: Text(Constants.WALK_UPLOAD_URL),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: <Widget> [
-                    const SizedBox(
-                      height: 45,
-                      width:  90,
-                      child: Text("Image"),
-                    ),
-                    SizedBox(
-                      height: 45,
-                      width:  100,
-                      child: Text(Constants.IMAGE_UPLOAD_URL),
+                      child: Text(Constants.TEST_UPLOAD_URL),
                     ),
                   ],
                 ),
@@ -550,16 +591,16 @@ class DressageCompanionState
 
   @override
   Future<void> uploadWalkDialog(var param) async {
-    _iv.uploadWalkName  = "";
-    _iv.uploadWalkClass = "";
-    _iv.uploadWalkNotes = "";
+    _iv.uploadTestName  = "";
+    _iv.uploadTestClass = "";
+    _iv.uploadTestNotes = "";
 
-    final TextEditingController walkCountryController = TextEditingController(text: _iv.uploadWalkCountry);
-    final TextEditingController walkNameController    = TextEditingController(text: _iv.uploadWalkName);
-    final TextEditingController walkUserController    = TextEditingController(text: _iv.uploadWalkUser);
-    final TextEditingController walkEmailController   = TextEditingController(text: _iv.uploadWalkEmail);
-    final TextEditingController walkClassController   = TextEditingController(text: _iv.uploadWalkClass);
-    final TextEditingController walkNotesController   = TextEditingController(text: _iv.uploadWalkNotes);
+    final TextEditingController walkCountryController = TextEditingController(text: _iv.uploadTestCountry);
+    final TextEditingController walkNameController    = TextEditingController(text: _iv.uploadTestName);
+    final TextEditingController walkUserController    = TextEditingController(text: _iv.uploadTestUser);
+    final TextEditingController walkEmailController   = TextEditingController(text: _iv.uploadTestEmail);
+    final TextEditingController walkClassController   = TextEditingController(text: _iv.uploadTestClass);
+    final TextEditingController walkNotesController   = TextEditingController(text: _iv.uploadTestNotes);
 
     // if (await ConnectivityUtils.hasConnection()) {
     if (await hasConnection()) {
@@ -568,7 +609,7 @@ class DressageCompanionState
           barrierDismissible: false, // user must tap button!
           builder: (BuildContext context) {
             return AlertDialog(
-              title: const Text(Constants.UPLOAD_WALK_DIALOG_TITLE),
+              title: const Text(Constants.UPLOAD_TEST_DIALOG_TITLE),
               scrollable: true,
               content: Container(
                 constraints: const BoxConstraints(
@@ -589,7 +630,7 @@ class DressageCompanionState
                               border: OutlineInputBorder(),
                               contentPadding: EdgeInsets.fromLTRB(
                                   12.0, 4.0, 12.0, 4.0),
-                              labelText: Constants.PROMPT_UPLOAD_WALK_USER,
+                              labelText: Constants.PROMPT_UPLOAD_TEST_USER,
                             ),
                           ),
                         ),
@@ -609,7 +650,7 @@ class DressageCompanionState
                               border: OutlineInputBorder(),
                               contentPadding: EdgeInsets.fromLTRB(
                                   12.0, 4.0, 12.0, 4.0),
-                              labelText: Constants.PROMPT_UPLOAD_WALK_EMAIL,
+                              labelText: Constants.PROMPT_UPLOAD_TEST_EMAIL,
                             ),
                             keyboardType: TextInputType.emailAddress,
                           ),
@@ -629,7 +670,7 @@ class DressageCompanionState
                               border: OutlineInputBorder(),
                               contentPadding: EdgeInsets.fromLTRB(
                                   12.0, 4.0, 12.0, 4.0),
-                              labelText: Constants.PROMPT_UPLOAD_WALK_COUNTRY,
+                              labelText: Constants.PROMPT_UPLOAD_TEST_COUNTRY,
                             ),
                           ),
                         ),
@@ -648,7 +689,7 @@ class DressageCompanionState
                               border: OutlineInputBorder(),
                               contentPadding: EdgeInsets.fromLTRB(
                                   12.0, 4.0, 12.0, 4.0),
-                              labelText: Constants.PROMPT_UPLOAD_WALK_NAME,
+                              labelText: Constants.PROMPT_UPLOAD_TEST_NAME,
                             ),
                           ),
                         ),
@@ -666,7 +707,7 @@ class DressageCompanionState
                               border: OutlineInputBorder(),
                               contentPadding: EdgeInsets.fromLTRB(
                                   12.0, 4.0, 12.0, 4.0),
-                              labelText: Constants.PROMPT_UPLOAD_WALK_CLASS,
+                              labelText: Constants.PROMPT_UPLOAD_TEST_CLASS,
                             ),
                           ),
                         ),
@@ -686,7 +727,7 @@ class DressageCompanionState
                               border: OutlineInputBorder(),
                               contentPadding: EdgeInsets.fromLTRB(
                                   12.0, 4.0, 12.0, 4.0),
-                              labelText: Constants.PROMPT_UPLOAD_WALK_NOTES,
+                              labelText: Constants.PROMPT_UPLOAD_TEST_NOTES,
                             ),
                           ),
                         ),
@@ -702,16 +743,16 @@ class DressageCompanionState
                       try {
                         if (walkNameController.text.isEmpty ||
                             walkUserController.text.isEmpty) {
-                          throw Exception(Constants.ERR_WALK_NAME_AND_USER_MUST_BE_SET);
+                          throw Exception(Constants.ERR_TEST_NAME_AND_USER_MUST_BE_SET);
                         }
-                        _iv.uploadWalkUser    = walkUserController.text;
-                        _iv.uploadWalkEmail   = walkEmailController.text;
-                        _iv.uploadWalkCountry = walkCountryController.text;
-                        _iv.uploadWalkName    = walkNameController.text;
-                        _iv.uploadWalkClass   = walkClassController.text;
-                        _iv.uploadWalkNotes   = walkNotesController.text;
+                        _iv.uploadTestUser    = walkUserController.text;
+                        _iv.uploadTestEmail   = walkEmailController.text;
+                        _iv.uploadTestCountry = walkCountryController.text;
+                        _iv.uploadTestName    = walkNameController.text;
+                        _iv.uploadTestClass   = walkClassController.text;
+                        _iv.uploadTestNotes   = walkNotesController.text;
                         _dismissDialog();
-                        _stateEvent.addEventToQueue(Constants.EVENT_UPLOAD_WALK, "");
+                        _stateEvent.addEventToQueue(Constants.EVENT_UPLOAD_TEST, "");
                       } catch (err) {
                         showMessage(
                             Constants.ERROR_DIALOG_TITLE, err.toString());
@@ -735,7 +776,7 @@ class DressageCompanionState
   @override
   Future<void> loginDialog() async {
     final String password = "";
-    final TextEditingController usernameController = TextEditingController(text: _iv.uploadWalkUser);
+    final TextEditingController usernameController = TextEditingController(text: _iv.uploadTestUser);
     final TextEditingController passwordController = TextEditingController(text: password);
 
     // if (await ConnectivityUtils.hasConnection()) {
@@ -745,7 +786,7 @@ class DressageCompanionState
           barrierDismissible: false, // user must tap button!
           builder: (BuildContext context) {
             return AlertDialog(
-              title: const Text(Constants.UPLOAD_WALK_DIALOG_TITLE),
+              title: const Text(Constants.UPLOAD_TEST_DIALOG_TITLE),
               scrollable: true,
               content: Container(
                 constraints: const BoxConstraints(
@@ -766,7 +807,7 @@ class DressageCompanionState
                               border: OutlineInputBorder(),
                               contentPadding: EdgeInsets.fromLTRB(
                                   12.0, 8.0, 12.0, 8.0),
-                              labelText: Constants.PROMPT_UPLOAD_WALK_USER,
+                              labelText: Constants.PROMPT_UPLOAD_TEST_USER,
                             ),
                           ),
                         ),
@@ -786,7 +827,7 @@ class DressageCompanionState
                               border: OutlineInputBorder(),
                               contentPadding: EdgeInsets.fromLTRB(
                                   12.0, 8.0, 12.0, 8.0),
-                              labelText: Constants.PROMPT_UPLOAD_WALK_EMAIL,
+                              labelText: Constants.PROMPT_UPLOAD_TEST_EMAIL,
                             ),
                             keyboardType: TextInputType.emailAddress,
                           ),
@@ -867,10 +908,10 @@ class DressageCompanionState
   @override
   void displayWalksWindow(var param) {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (BuildContext context) => WalkWindow(currentWalkName: _iv.walkName)),
+      MaterialPageRoute(builder: (BuildContext context) => TestWindow(currentTestName: _iv.testName)),
     ).then((result) {
       if ((result as String).isNotEmpty) {
-        _stateEvent.addEventToQueue(Constants.EVENT_LOAD_WALK, result);
+        _stateEvent.addEventToQueue(Constants.EVENT_LOAD_TEST, result);
       }
     });
   }
@@ -899,10 +940,10 @@ class DressageCompanionState
     Navigator.pop(dialogContext);
 
     if (results.status == 200) {
-      showMessage(Constants.INFORMATION_DIALOG_TITLE, Constants.INFO_WALK_UPLOADED_OK);
+      showMessage(Constants.INFORMATION_DIALOG_TITLE, Constants.INFO_TEST_UPLOADED_OK);
     } else {
       if (results.message == null || results.message!.isEmpty) {
-        showMessage(Constants.ERROR_DIALOG_TITLE, Constants.ERR_CANT_UPLOAD_WALK);
+        showMessage(Constants.ERROR_DIALOG_TITLE, Constants.ERR_CANT_UPLOAD_TEST);
       } else {
         String errm = "${results.message!} - status ${results.status}";
         showMessage(Constants.ERROR_DIALOG_TITLE, errm);
@@ -918,22 +959,22 @@ class DressageCompanionState
     late UploadResults results;
 
     // Get the current walk
-    final Walk walk  = await _iv.db.getWalk(_iv.walkName);
+    final Walk walk  = await _iv.db.getWalk(_iv.testName);
     const Uuid uuid  = Uuid();
     final String uid = uuid.v1(); // Generate a v1 (time-based) id
 
     final String json = '{"device_uuid": "${_iv.deviceUuid}",' +
-        '"name": "${Uri.encodeComponent(_iv.uploadWalkName)}",'       +
+        '"name": "${Uri.encodeComponent(_iv.uploadTestName)}",'       +
         '"year": ${DateFormat("yyyy").format(DateTime.now())},'       +
-        '"country": "${Uri.encodeComponent(_iv.uploadWalkCountry)}",' +
-        '"user": "${Uri.encodeComponent(_iv.uploadWalkUser)}",'       +
-        '"email": "${Uri.encodeComponent(_iv.uploadWalkEmail)}",'     +
-        '"class": "${Uri.encodeComponent(_iv.uploadWalkClass)}",'     +
-        '"notes":"${Uri.encodeComponent(_iv.uploadWalkNotes)}",'      +
+        '"country": "${Uri.encodeComponent(_iv.uploadTestCountry)}",' +
+        '"user": "${Uri.encodeComponent(_iv.uploadTestUser)}",'       +
+        '"email": "${Uri.encodeComponent(_iv.uploadTestEmail)}",'     +
+        '"class": "${Uri.encodeComponent(_iv.uploadTestClass)}",'     +
+        '"notes":"${Uri.encodeComponent(_iv.uploadTestNotes)}",'      +
         '"uuid": "$uid",'                                             +
         '"walk":${walk.toJson()}}';
 
-    const String url                = Constants.WALK_UPLOAD_URL;
+    const String url                = Constants.TEST_UPLOAD_URL;
     final HttpClient httpClient     = HttpClient();
     final HttpClientRequest request = await httpClient.postUrl(Uri.parse(url));
     // request.headers.set('content-type', 'application/json; charset="UTF-8"');
@@ -952,9 +993,9 @@ class DressageCompanionState
 
     // Write the uploaded walk name and user to the preferences
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString(Constants.UPLOAD_WALK_COUNTRY_KEY,_iv.uploadWalkCountry);
-    await prefs.setString(Constants.UPLOAD_WALK_USER_KEY,_iv.uploadWalkUser);
-    await prefs.setString(Constants.UPLOAD_WALK_EMAIL_KEY,_iv.uploadWalkEmail);
+    await prefs.setString(Constants.UPLOAD_TEST_COUNTRY_KEY,_iv.uploadTestCountry);
+    await prefs.setString(Constants.UPLOAD_TEST_USER_KEY,_iv.uploadTestUser);
+    await prefs.setString(Constants.UPLOAD_TEST_EMAIL_KEY,_iv.uploadTestEmail);
     return results;
   }
 
@@ -970,7 +1011,7 @@ class DressageCompanionState
   void clearDisplay(var param) {
     _iv.clearDisplayEnabled = false;
     setState(() {
-      _iv.walkName               = "";
+      _iv.testName               = "";
       _iv.distanceNotifier.value = 0;
       _iv.showImage              = true;
       _iv.appTitle               = Text(_iv.title);
@@ -1045,7 +1086,7 @@ class DressageCompanionState
     }
 
     setState(() {
-      _iv.walkName       = param;
+      _iv.testName       = param;
       _iv.showImage      = false;
       _iv.appTitle       = Text("${_iv.title} - $param");
       if (walk.track.isNotEmpty) {
@@ -1055,7 +1096,7 @@ class DressageCompanionState
       }
       _iv.clearDisplayEnabled = true;
     });
-    _stateEvent.addEventToQueue(Constants.EVENT_WALK_LOADED, null);
+    _stateEvent.addEventToQueue(Constants.EVENT_TEST_LOADED, null);
   }
 
   @override
@@ -1088,7 +1129,7 @@ class DressageCompanionState
   @override
   Future<void> startTracking(var param) async {
     final DateTime now = DateTime.now();
-    final String walkName = "Walk on ${DateFormat("yyyy-MM-dd HH:mm:ss").format(now)}";
+    final String walkName = "Test on ${DateFormat("yyyy-MM-dd HH:mm:ss").format(now)}";
     try {
       await _iv.db.addWalk(walkName);
 
@@ -1096,14 +1137,14 @@ class DressageCompanionState
 
       setState(() {
         _iv.appTitle  = Text(walkName);
-        _iv.walkName  = walkName;
+        _iv.testName  = walkName;
         _iv.showImage = false;
         clearButtons();
         _iv.buttons[0] = simpleButton(Constants.PROMPT_PAUSE, () {
           _stateEvent.addEventToQueue(Constants.EVENT_PAUSE_TRACKING, null);
         });
       });
-      _stateEvent.addEventToQueue(Constants.EVENT_WALK_LOADED, null);
+      _stateEvent.addEventToQueue(Constants.EVENT_TEST_LOADED, null);
     } catch (err) {
       //   print("Error $err adding walk '$walkName'");
     }

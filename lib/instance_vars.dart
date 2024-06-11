@@ -20,24 +20,24 @@ class InstanceVars {
   late AnimationController animator;
   List<Widget?> buttons = [null, null, null];
   Timer? timer;
-  String uploadWalkCountry = "";
-  String uploadWalkName    = "";
-  String uploadWalkUser    = "";
-  String uploadWalkEmail   = "";
-  String uploadWalkClass   = "";
-  String uploadWalkNotes   = "";
+  String uploadTestCountry = "";
+  String uploadTestName    = "";
+  String uploadTestUser    = "";
+  String uploadTestEmail   = "";
+  String uploadTestClass   = "";
+  String uploadTestNotes   = "";
   String deviceUuid        = "";
   String packageName       = "";
 
-  Text appTitle = const Text("");
-  String title = "";
+  Text  appTitle  = const Text("");
+  String title    = "";
+  String testName = "";
 
-  String walkName = "";
-  bool showImage = false;
-  bool displayWalksEnabled = true;
+  bool showImage           = true;
+  bool displayTestsEnabled = true;
   bool clearDisplayEnabled = false;
-  bool uploadWalkEnabled = false;
-  bool showProgressBar = false;
+  bool uploadTestEnabled   = false;
+  bool showProgressBar     = false;
 
   bool isImageLoaded = false;
   String landscapeImageFile = "assets/images/CrossCountryLandscape.png";

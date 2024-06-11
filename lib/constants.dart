@@ -8,19 +8,18 @@ class Constants {
 
   static const String appTitleStem = "Course";
 
-  static const String UPLOAD_WALK_COUNTRY_KEY = "upload_country_name";
-  static const String UPLOAD_WALK_USER_KEY    = "upload_walk_user";
-  static const String UPLOAD_WALK_EMAIL_KEY   = "upload_walk_email";
+  static const String UPLOAD_TEST_COUNTRY_KEY = "upload_country_name";
+  static const String UPLOAD_TEST_USER_KEY    = "upload_test_user";
+  static const String UPLOAD_TEST_EMAIL_KEY   = "upload_test_email";
   static const String DEVICE_UUID             = "device_uuid";
 
-  static const String WALK_UPLOAD_URL  = "http://wamm.me.uk/cwc/walk_upload.php";
-  static const String IMAGE_UPLOAD_URL = "http://wamm.me.uk/cwc/image_upload.php";
+  static const String TEST_UPLOAD_URL  = "http://wamm.me.uk/dc/test_upload.php";
 
-  static const String WALK_WINDOW_TITLE         = "Select a walk";
+  static const String TEST_WINDOW_TITLE         = "Select a test";
   static const String RENAME_DIALOG_TITLE       = "Rename";
   static const String ERROR_DIALOG_TITLE        = "ERROR";
   static const String INFORMATION_DIALOG_TITLE  = "Information";
-  static const String UPLOAD_WALK_DIALOG_TITLE  = "Upload Walk";
+  static const String UPLOAD_TEST_DIALOG_TITLE  = "Upload Test";
   static const String GPS_STATUS_DIALOG_TITLE   = "GPS Status";
 
   static const String PROMPT_AWAIT_GPS            = "Await GPS";
@@ -37,60 +36,52 @@ class Constants {
   static const String PROMPT_YES                  = "Yes";
   static const String PROMPT_NO                   = "No";
   static const String PROMPT_SET                  = "Set";
-  static const String PROMPT_UPLOAD_WALK_USER     = "Uploaded by";
-  static const String PROMPT_UPLOAD_WALK_EMAIL    = "Email";
-  static const String PROMPT_UPLOAD_WALK_COUNTRY  = "Country";
-  static const String PROMPT_UPLOAD_WALK_NAME     = "Course name";
-  static const String PROMPT_UPLOAD_WALK_CLASS    = "Class";
-  static const String PROMPT_UPLOAD_WALK_NOTES    = "Notes";
+  static const String PROMPT_UPLOAD_TEST_USER     = "Uploaded by";
+  static const String PROMPT_UPLOAD_TEST_EMAIL    = "Email";
+  static const String PROMPT_UPLOAD_TEST_COUNTRY  = "Country";
+  static const String PROMPT_UPLOAD_TEST_NAME     = "Test name";
+  static const String PROMPT_UPLOAD_TEST_CLASS    = "Class";
+  static const String PROMPT_UPLOAD_TEST_NOTES    = "Notes";
   static const String PROMPT_UPLOAD               = "Upload";
 
-  static const String PROMPT_DELETE_WALK    = "Are you sure you want to delete this walk?";
+  static const String PROMPT_DELETE_TEST    = "Are you sure you want to delete this test?";
 
   static const String PROMPT_LATITUDE  = "Latitude";
   static const String PROMPT_LONGITUDE = "Longitude";
 
-  static const String MENU_PROMPT_DEBUG_WALKS   = "Debug Walks";
+  static const String MENU_PROMPT_DEBUG_TESTS   = "Debug Tests";
   static const String MENU_PROMPT_DEBUG         = "Debug";
   static const String MENU_PROMPT_GPS_STATUS    = "GPS Status";
   static const String MENU_PROMPT_CLEAR_DISPLAY = "Clear Display";
   static const String MENU_PROMPT_GALLERY       = "Gallery";
-  static const String MENU_PROMPT_WALKS         = "Walks";
+  static const String MENU_PROMPT_TESTS         = "Tests";
   static const String MENU_PROMPT_MAPS          = "Maps";
-  static const String MENU_PROMPT_UPLOAD        = "Upload walk";
+  static const String MENU_PROMPT_UPLOAD        = "Upload test";
   static const String MENU_PROMPT_LOGIN         = "Login";
   static const String MENU_PROMPT_LOGOUT        = "Logout";
 
-  static const Set<String> MENU_CHOICES = { MENU_PROMPT_DEBUG_WALKS,
+  static const Set<String> MENU_CHOICES = { MENU_PROMPT_DEBUG_TESTS,
   MENU_PROMPT_DEBUG,
   MENU_PROMPT_CLEAR_DISPLAY,
-  MENU_PROMPT_WALKS,
+  MENU_PROMPT_TESTS,
   MENU_PROMPT_UPLOAD,
   MENU_PROMPT_LOGIN };
-
-  // static const int DEBUG_WALKS_SELECTED   = 0;
-  // static const int DEBUG_SELECTED         = 1;
-  // static const int CLEAR_DISPLAY_SELECTED = 2;
-  // static const int OPTIMUM_TIME_SELECTED  = 3;
-  // static const int GALLERY_SELECTED       = 4;
-  // static const int WALKS_SELECTED         = 5;
-  // static const int MAPS_SELECTED          = 6;
 
   static const String STATE_STARTUP_AWAIT_PERMISSIONS     = "startup_await_permissions";
   static const String STATE_STARTUP_AWAIT_VALID_FIX       = "startup_await_valid_fix";
   static const String STATE_STARTUP_AWAIT_FIX_SETTLE      = "startup_await_fix_settle";
   static const String STATE_IDLE                          = "idle";
-  static const String STATE_WALK_LOADED_AWAIT_VALID_FIX   = "walk_loaded_await_valid_fix";
-  static const String STATE_WALK_LOADED_AWAIT_FIX_SETTLE  = "walk_loaded_await_fix_settle";
-  static const String STATE_WALK_LOADED                   = "walk_loaded";
+  static const String STATE_TEST_LOADED_AWAIT_VALID_FIX   = "test_loaded_await_valid_fix";
+  static const String STATE_TEST_LOADED_AWAIT_FIX_SETTLE  = "test_loaded_await_fix_settle";
+  static const String STATE_TEST_LOADED                   = "test_loaded";
   static const String STATE_TRACKING                      = "tracking";
   static const String STATE_TRACKING_PAUSED               = "paused";
   static const String STATE_AWAIT_TRACKING_STOP_TIMEOUT   = "await_stop";
-  static const String STATE_NEW_WALK_LOADING              = "new_walk_loading";
-  static const String STATE_WALK_LOADING                  = "walk_loading";
-  static const String STATE_WALK_LOADING_AWAIT_VALID_FIX  = "walk_loading_await_valid_fix";
-  static const String STATE_WALK_LOADING_AWAIT_FIX_SETTLE = "walk_loading_await_fix_settle";
-  static const String STATE_WALK_LOADED_AWAIT_PERMISSIONS = "walk_loaded_await_permissions";
+  static const String STATE_NEW_TEST_LOADING              = "new_test_loading";
+  static const String STATE_TEST_LOADING                  = "test_loading";
+  static const String STATE_TEST_LOADING_AWAIT_VALID_FIX  = "test_loading_await_valid_fix";
+  static const String STATE_TEST_LOADING_AWAIT_FIX_SETTLE = "test_loading_await_fix_settle";
+  static const String STATE_TEST_LOADED_AWAIT_PERMISSIONS = "test_loaded_await_permissions";
   static const String STATE_IDLE_AWAIT_PERMISSIONS        = "idle_await_permissions";
 
   static const String EVENT_STARTUP = "startup";
@@ -111,17 +102,17 @@ class Constants {
   static const String EVENT_STOP_TRACKING_TIMEOUT    = "stop_tracking_timeout";
 
   static const String EVENT_DEBUG                    = "debug";
-  static const String EVENT_CREATE_DEBUG_WALKS       = "debug_walks";
+  static const String EVENT_CREATE_DEBUG_TESTS       = "debug_tests";
   static const String EVENT_SHOW_GPS_STATUS_DIALOG   = "show_gps_status";
   static const String EVENT_CLEAR_DISPLAY            = "clear_display";
   static const String EVENT_SHOW_OPTIMUM_TIME_DIALOG = "show_optimum_time";
   static const String EVENT_SET_OPTIMUM_TIME         = "set_optimum_time";
-  static const String EVENT_DISPLAY_WALKS            = "walks";
-  static const String EVENT_LOAD_WALK                = "load_walk";
-  static const String EVENT_SHOW_UPLOAD_WALK_DIALOG  = "show_upload_walk";
-  static const String EVENT_UPLOAD_WALK              = "upload_walk";
+  static const String EVENT_DISPLAY_TESTS            = "tests";
+  static const String EVENT_LOAD_TEST                = "load_test";
+  static const String EVENT_SHOW_UPLOAD_TEST_DIALOG  = "show_upload_test";
+  static const String EVENT_UPLOAD_TEST              = "upload_test";
 
-  static const String EVENT_WALK_LOADED              = "walk_loaded";
+  static const String EVENT_TEST_LOADED              = "test_loaded";
 
   static const String EVENT_SWITCH_TO_BACKGROUND     = "background";
   static const String EVENT_SWITCH_TO_FOREGROUND     = "foreground";
@@ -133,15 +124,15 @@ class Constants {
   static const String EVENT_LOGIN  = "login";
   static const String EVENT_LOGOUT = "logout";
 
-  static const String ERR_WALK_NAME_INVALID            = "Walk name must not be blank or empty.";
+  static const String ERR_TEST_NAME_INVALID            = "Test name must not be blank or empty.";
 
   static const String ERR_USERNAME_AND_PASSWORD_MUST_BE_SPECIFIED = "The username and password must be specified";
 
-  static const String ERR_WALK_NAME_AND_USER_MUST_BE_SET = "The course name and the user must be specified.";
-  static const String ERR_CANT_UPLOAD_WALK               = "The course walk cannot be uploaded - please report to admin@wamm.me.uk.";
-  static const String ERR_NO_CONNECTIVITY                = "The course walk cannot be uploaded as there is no internet connectivity. Please try again later.";
+  static const String ERR_TEST_NAME_AND_USER_MUST_BE_SET = "The course name and the user must be specified.";
+  static const String ERR_CANT_UPLOAD_TEST               = "The course test cannot be uploaded - please report to admin@wamm.me.uk.";
+  static const String ERR_NO_CONNECTIVITY                = "The course test cannot be uploaded as there is no internet connectivity. Please try again later.";
 
-  static const String INFO_WALK_UPLOADED_OK = "The walk was uploaded successfully.";
+  static const String INFO_TEST_UPLOADED_OK = "The test was uploaded successfully.";
 
   static const String REQUEST_LOCATION_PERMISSIONS_BEFORE_GRANTED_TITLE = 'Location Permissions';
   static const String REQUEST_LOCATION_PERMISSIONS_AFTER_GRANTED_TITLE  = 'Location Permissions Removed';
