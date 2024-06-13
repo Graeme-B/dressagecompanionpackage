@@ -104,12 +104,12 @@ class StateEvent {
 
     actions[Constants.STATE_TEST_LOADING_AWAIT_FIX_SETTLE] = {
       Constants.EVENT_TEST_LOADED:        [sef.centreDisplay, (parms) {setState(Constants.STATE_TEST_LOADED_AWAIT_FIX_SETTLE);},],
-      Constants.EVENT_FIX_SETTLE_TIMEOUT: [sef.setReadyToTrack, (parms) {setState(Constants.STATE_TEST_LOADED);},],
+      Constants.EVENT_FIX_SETTLE_TIMEOUT: [sef.setReadyToTrackOrReplay, (parms) {setState(Constants.STATE_TEST_LOADED);},],
       Constants.EVENT_GPS_COORDS:         [sef.storePosition,],
     };
 
     actions[Constants.STATE_TEST_LOADED_AWAIT_FIX_SETTLE] = {
-      Constants.EVENT_FIX_SETTLE_TIMEOUT:       [sef.setReadyToTrack, (parms) {setState(Constants.STATE_TEST_LOADED);},],
+      Constants.EVENT_FIX_SETTLE_TIMEOUT:       [sef.setReadyToTrackOrReplay, (parms) {setState(Constants.STATE_TEST_LOADED);},],
       Constants.EVENT_GPS_COORDS:               [sef.storePosition,],
       Constants.EVENT_SHOW_UPLOAD_TEST_DIALOG:  [sef.uploadWalkDialog],
       Constants.EVENT_CREATE_DEBUG_TESTS:       [dw.addDebugWalks],
@@ -152,7 +152,7 @@ class StateEvent {
     };
 
     actions[Constants.STATE_TEST_LOADING] = {
-      Constants.EVENT_TEST_LOADED: [sef.centreDisplay, (parms) {setState(Constants.STATE_TEST_LOADED);},],
+      Constants.EVENT_TEST_LOADED: [sef.centreDisplay, sef.setReadyToTrackOrReplay, (parms){setState(Constants.STATE_TEST_LOADED);},],
     };
 
     actions[Constants.STATE_TEST_LOADED] = {
@@ -160,19 +160,67 @@ class StateEvent {
       Constants.EVENT_DEBUG:                    [dw.writeDebug],
       Constants.EVENT_CREATE_DEBUG_TESTS:       [dw.addDebugWalks],
       Constants.EVENT_SHOW_GPS_STATUS_DIALOG:   [sef.gpsStatusDialog],
-      Constants.EVENT_CLEAR_DISPLAY:            [sef.clearWalkPoints,sef.clearDisplay,sef.centreDisplay,(parms) {setState(Constants.STATE_IDLE);}],
+      Constants.EVENT_CLEAR_DISPLAY:            [sef.setReadyToTrack,sef.clearWalkPoints,sef.clearDisplay,sef.centreDisplay,(parms) {setState(Constants.STATE_IDLE);}],
       Constants.EVENT_GPS_COORDS:               [sef.storePosition,],
       Constants.EVENT_SHOW_UPLOAD_TEST_DIALOG:  [sef.uploadWalkDialog],
       Constants.EVENT_SET_OPTIMUM_TIME:         [f.setOptimumTime],
       Constants.EVENT_UPLOAD_TEST:              [sef.uploadWalk],
       Constants.EVENT_DISPLAY_TESTS:            [sef.displayWalksWindow],
       Constants.EVENT_LOAD_TEST:                [sef.clearWalkPoints,sef.loadWalk,(parms) {setState(Constants.STATE_TEST_LOADING);},],
+      Constants.EVENT_START_REPLAY:             [f.disableMenuItems, sef.startReplay, (parms) {setState(Constants.STATE_TEST_REPLAYING);},],
 
       Constants.EVENT_SWITCH_TO_FOREGROUND:     [sef.checkLocationPermissions],
       Constants.EVENT_SWITCH_TO_BACKGROUND:     [sef.stopService],
       Constants.EVENT_LOCATION_GRANTED:         [sef.startService],
       Constants.EVENT_LOCATION_NOT_YET_GRANTED: [sef.permissionRevoked, sef.requestLocationPermissions,(parms) {setState(Constants.STATE_TEST_LOADED_AWAIT_PERMISSIONS);},],
       Constants.EVENT_LOCATION_DENIED:          [sef.permissionRevoked, sef.showLocationSettingsAfterGranted,(parms) {setState(Constants.STATE_TEST_LOADED_AWAIT_PERMISSIONS);},],
+    };
+
+    actions[Constants.STATE_TEST_REPLAYING] = {
+      // Constants.EVENT_START_TRACKING:           [f.disableMenuItems,sef.clearWalkPoints,sef.startTracking,(parms) {setState(Constants.STATE_NEW_TEST_LOADING);},],
+      // Constants.EVENT_DEBUG:                    [dw.writeDebug],
+      // Constants.EVENT_CREATE_DEBUG_TESTS:       [dw.addDebugWalks],
+      // Constants.EVENT_SHOW_GPS_STATUS_DIALOG:   [sef.gpsStatusDialog],
+      // Constants.EVENT_CLEAR_DISPLAY:            [sef.setReadyToTrack,sef.clearWalkPoints,sef.clearDisplay,sef.centreDisplay,(parms) {setState(Constants.STATE_IDLE);}],
+      // Constants.EVENT_GPS_COORDS:               [sef.storePosition,],
+      // Constants.EVENT_SHOW_UPLOAD_TEST_DIALOG:  [sef.uploadWalkDialog],
+      // Constants.EVENT_SET_OPTIMUM_TIME:         [f.setOptimumTime],
+      // Constants.EVENT_UPLOAD_TEST:              [sef.uploadWalk],
+      // Constants.EVENT_DISPLAY_TESTS:            [sef.displayWalksWindow],
+      // Constants.EVENT_LOAD_TEST:                [sef.clearWalkPoints,sef.loadWalk,(parms) {setState(Constants.STATE_TEST_LOADING);},],
+      // Constants.EVENT_START_REPLAY:             [sef.startReplayTimer, sef.replay, (parms) {setState(Constants.STATE_TEST_REPLAYING);},],
+      //
+      // Constants.EVENT_SWITCH_TO_FOREGROUND:     [sef.checkLocationPermissions],
+      // Constants.EVENT_SWITCH_TO_BACKGROUND:     [sef.stopService],
+      // Constants.EVENT_LOCATION_GRANTED:         [sef.startService],
+      // Constants.EVENT_LOCATION_NOT_YET_GRANTED: [sef.permissionRevoked, sef.requestLocationPermissions,(parms) {setState(Constants.STATE_TEST_LOADED_AWAIT_PERMISSIONS);},],
+      // Constants.EVENT_LOCATION_DENIED:          [sef.permissionRevoked, sef.showLocationSettingsAfterGranted,(parms) {setState(Constants.STATE_TEST_LOADED_AWAIT_PERMISSIONS);},],
+      Constants.EVENT_REPLAY_TIMER_TICK:         [sef.replayTimerTick],
+      Constants.EVENT_PAUSE_REPLAY:              [sef.pauseReplay,(parms) {setState(Constants.STATE_TEST_REPLAY_PAUSED);},],
+      Constants.EVENT_STOP_REPLAY:               [f.enableMenuItems,sef.stopReplay,sef.setReadyToTrackOrReplay,(parms) {setState(Constants.STATE_TEST_LOADED);},],
+    };
+
+    actions[Constants.STATE_TEST_REPLAY_PAUSED] = {
+      // Constants.EVENT_START_TRACKING:           [f.disableMenuItems,sef.clearWalkPoints,sef.startTracking,(parms) {setState(Constants.STATE_NEW_TEST_LOADING);},],
+      // Constants.EVENT_DEBUG:                    [dw.writeDebug],
+      // Constants.EVENT_CREATE_DEBUG_TESTS:       [dw.addDebugWalks],
+      // Constants.EVENT_SHOW_GPS_STATUS_DIALOG:   [sef.gpsStatusDialog],
+      // Constants.EVENT_CLEAR_DISPLAY:            [sef.setReadyToTrack,sef.clearWalkPoints,sef.clearDisplay,sef.centreDisplay,(parms) {setState(Constants.STATE_IDLE);}],
+      // Constants.EVENT_GPS_COORDS:               [sef.storePosition,],
+      // Constants.EVENT_SHOW_UPLOAD_TEST_DIALOG:  [sef.uploadWalkDialog],
+      // Constants.EVENT_SET_OPTIMUM_TIME:         [f.setOptimumTime],
+      // Constants.EVENT_UPLOAD_TEST:              [sef.uploadWalk],
+      // Constants.EVENT_DISPLAY_TESTS:            [sef.displayWalksWindow],
+      // Constants.EVENT_LOAD_TEST:                [sef.clearWalkPoints,sef.loadWalk,(parms) {setState(Constants.STATE_TEST_LOADING);},],
+      // Constants.EVENT_START_REPLAY:             [sef.startReplayTimer, sef.replay, (parms) {setState(Constants.STATE_TEST_REPLAYING);},],
+      //
+      // Constants.EVENT_SWITCH_TO_FOREGROUND:     [sef.checkLocationPermissions],
+      // Constants.EVENT_SWITCH_TO_BACKGROUND:     [sef.stopService],
+      // Constants.EVENT_LOCATION_GRANTED:         [sef.startService],
+      // Constants.EVENT_LOCATION_NOT_YET_GRANTED: [sef.permissionRevoked, sef.requestLocationPermissions,(parms) {setState(Constants.STATE_TEST_LOADED_AWAIT_PERMISSIONS);},],
+      // Constants.EVENT_LOCATION_DENIED:          [sef.permissionRevoked, sef.showLocationSettingsAfterGranted,(parms) {setState(Constants.STATE_TEST_LOADED_AWAIT_PERMISSIONS);},],
+      Constants.EVENT_RESUME_REPLAY:             [sef.resumeReplay,(parms) {setState(Constants.STATE_TEST_REPLAYING);},],
+      Constants.EVENT_STOP_REPLAY:               [f.enableMenuItems, sef.stopReplay,sef.setReadyToTrackOrReplay,(parms) {setState(Constants.STATE_TEST_LOADED);},]
     };
 
     actions[Constants.STATE_TEST_LOADED_AWAIT_PERMISSIONS] = {

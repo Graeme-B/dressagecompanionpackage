@@ -25,7 +25,13 @@ abstract class StateEventFunctionInterface {
   void addCoordsToMap(Map<Object?, Object?> map);
   void initialFixReceived(var param);
   void storePosition(Map<Object?, Object?> map);
+  void replayTimerTick(var param);
+  void startReplay(var param);
+  void stopReplay(var param);
+  void pauseReplay(var param);
+  void resumeReplay(var param);
   void setReadyToTrack(var param);
+  void setReadyToTrackOrReplay(var param);
   void pauseTracking(var param);
   void resumeTracking(var param);
   void stopTrackingPressedAction(var param);

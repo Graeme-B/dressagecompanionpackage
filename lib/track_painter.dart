@@ -10,16 +10,15 @@ class TrackPainter extends CustomPainter
 
   TrackPainter({required Listenable repaint}) : super(repaint: repaint)
   {
-    // _repaint = repaint;
   }
-  List<WalkTrackPoint> waypoints     = [];
-  List<WalkImage>      images        = [];
-  List<WalkWaypoint>   minuteMarkers = [];
-  // ChangeNotifier       _repaint      = ChangeNotifier();
+  List<WalkTrackPoint> waypoints               = [];
+  List<WorldToScreen>  translations            = [];
+  bool                 recalculateTranslations = true;
 
-  void addWalkTrackPoints(List<WalkTrackPoint> waypoints)
+  void addWalkTrackPoints(List<WalkTrackPoint> waypoints, bool recalculateTranslations)
   {
-    this.waypoints = waypoints;
+    this.waypoints               = waypoints;
+    this.recalculateTranslations = recalculateTranslations;
   }
 
   void addWalkTrackPoint(WalkTrackPoint waypoint)
@@ -29,28 +28,13 @@ class TrackPainter extends CustomPainter
 
   void clearWalkTrack()
   {
-    waypoints   = [];
-    images      = [];
-    minuteMarkers = [];
+    waypoints               = [];
+    translations            = [];
+    recalculateTranslations = true;
   }
 
-  void addWalkImages(List<WalkImage> images)
-  {
-    this.images = images;
-  }
-
-  void addWalkTrackImage(WalkImage image)
-  {
-    images.add(image);
-  }
-
-  void addWalkMinuteMarkers(List<WalkWaypoint> timeMarkers)
-  {
-    minuteMarkers = timeMarkers;
-  }
-
-  List<WorldToScreen> getTranslations(Size size) {
-    final List<WorldToScreen> translations = [];
+  void getTranslations(Size size) {
+    translations = [];
 
     // If we have more than one waypoint, calculate the axes translations and draw the points
     if (waypoints.length > 1) {
@@ -117,7 +101,6 @@ class TrackPainter extends CustomPainter
       translations.add(WorldToScreen(0, size.height, latMin, latMax));
       translations.add(WorldToScreen(0, size.width, lonMin, lonMax));
     }
-    return translations;
   }
 
   @override
@@ -154,7 +137,9 @@ class TrackPainter extends CustomPainter
     // border1.close();
     // canvas.drawPath(border1, paint);
 
-    final List<WorldToScreen> translations = getTranslations(size);
+    if (recalculateTranslations) {
+      getTranslations(size);
+    }
     if (translations.isNotEmpty) {
       final latTranslate = translations[0];
       final lonTranslate = translations[1];
@@ -174,19 +159,6 @@ class TrackPainter extends CustomPainter
             latTranslate.mapWorldToScreen(waypoints[i].latitude));
         canvas.drawLine(o1, o2, paint);
         o1 = o2;
-      }
-
-      // Draw the minute markers
-      if (minuteMarkers.isNotEmpty) {
-        paint.color = Colors.red;
-        for (final marker in minuteMarkers) {
-          final Offset o = Offset(lonTranslate.mapWorldToScreen(marker.longitude),
-              latTranslate.mapWorldToScreen(marker.latitude));
-          canvas.drawLine(Offset(o.dx - Constants.CROSS_SIZE, o.dy - Constants.CROSS_SIZE),
-              Offset(o.dx + Constants.CROSS_SIZE, o.dy + Constants.CROSS_SIZE), paint);
-          canvas.drawLine(Offset(o.dx + Constants.CROSS_SIZE, o.dy - Constants.CROSS_SIZE),
-              Offset(o.dx - Constants.CROSS_SIZE, o.dy + Constants.CROSS_SIZE), paint);
-        }
       }
     }
   }

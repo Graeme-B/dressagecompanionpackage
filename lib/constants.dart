@@ -25,6 +25,8 @@ class Constants {
   static const String PROMPT_AWAIT_GPS            = "Await GPS";
   static const String PROMPT_START_TRACKING       = "Start";
   static const String PROMPT_STOP_TRACKING        = "Stop";
+  static const String PROMPT_START_REPLAY         = "Replay";
+  static const String PROMPT_STOP_REPLAY          = "Stop";
   static const String PROMPT_PAUSE                = "Pause";
   static const String PROMPT_RESUME               = "Resume";
   static const String PROMPT_LOAD                 = "Load";
@@ -67,6 +69,10 @@ class Constants {
   MENU_PROMPT_UPLOAD,
   MENU_PROMPT_LOGIN };
 
+  static const double STOP_TIMEOUT_DELAY = 3000.0;
+  static const int STOP_TIMEOUT_TICK     = 10;
+  static const int REPLAY_TIMER_TICK     = 100;
+
   static const String STATE_STARTUP_AWAIT_PERMISSIONS     = "startup_await_permissions";
   static const String STATE_STARTUP_AWAIT_VALID_FIX       = "startup_await_valid_fix";
   static const String STATE_STARTUP_AWAIT_FIX_SETTLE      = "startup_await_fix_settle";
@@ -74,6 +80,8 @@ class Constants {
   static const String STATE_TEST_LOADED_AWAIT_VALID_FIX   = "test_loaded_await_valid_fix";
   static const String STATE_TEST_LOADED_AWAIT_FIX_SETTLE  = "test_loaded_await_fix_settle";
   static const String STATE_TEST_LOADED                   = "test_loaded";
+  static const String STATE_TEST_REPLAYING                = "test_replaying";
+  static const String STATE_TEST_REPLAY_PAUSED            = "test_replay_paused";
   static const String STATE_TRACKING                      = "tracking";
   static const String STATE_TRACKING_PAUSED               = "paused";
   static const String STATE_AWAIT_TRACKING_STOP_TIMEOUT   = "await_stop";
@@ -100,6 +108,12 @@ class Constants {
   static const String EVENT_STOP_TRACKING_PRESSED    = "stop_tracking_pressed";
   static const String EVENT_STOP_TRACKING_RELEASED   = "stop_tracking_released";
   static const String EVENT_STOP_TRACKING_TIMEOUT    = "stop_tracking_timeout";
+
+  static const String EVENT_START_REPLAY             = "start_replay";
+  static const String EVENT_STOP_REPLAY              = "stop_replay";
+  static const String EVENT_PAUSE_REPLAY             = "pause_replay";
+  static const String EVENT_RESUME_REPLAY            = "resume_replay";
+  static const String EVENT_REPLAY_TIMER_TICK        = "replay_timer_tick";
 
   static const String EVENT_DEBUG                    = "debug";
   static const String EVENT_CREATE_DEBUG_TESTS       = "debug_tests";

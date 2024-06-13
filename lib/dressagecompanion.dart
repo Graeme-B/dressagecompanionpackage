@@ -1,7 +1,9 @@
 import "dart:convert";
 import "dart:core";
 import "dart:io";
+import "dart:math";
 import "dart:ui" as ui;
+import "dart:async";
 import "package:connectivity_plus/connectivity_plus.dart";
 import "package:dressagecompanionpackage/state_event.dart";
 import "package:dressagecompanionpackage/state_event_functions_interface.dart";
@@ -11,7 +13,6 @@ import "package:dressagecompanionpackage/test_window.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:google_mobile_ads/google_mobile_ads.dart";
-import "dart:async";
 
 import "package:gps_tracker/gps_tracker.dart";
 import "package:gps_tracker_db/gps_tracker_db.dart";
@@ -350,6 +351,7 @@ class DressageCompanionState
       ],
     );
   }
+
 
   Widget progressBar() {
     return ValueListenableBuilder(
@@ -881,6 +883,17 @@ class DressageCompanionState
     _stateEvent.addEventToQueue(Constants.EVENT_STOP_TRACKING_RELEASED, null);
   }
 
+  void startReplayTimer(var param) {
+    _iv.timer = Timer.periodic(
+        const Duration(milliseconds: Constants.REPLAY_TIMER_TICK), (Timer timer) {
+      _stateEvent.addEventToQueue(Constants.EVENT_REPLAY_TIMER_TICK, null);
+    });
+  }
+
+  void stopReplayTimer(var param) {
+    _iv.timer?.cancel();
+  }
+
   // ------------------------ State event functions ---------------------------
   @override
   Future<void> startService(var param) async
@@ -1030,22 +1043,19 @@ class DressageCompanionState
       // var speed     = map["speed"] as double;
       final distance = map["distance"]! as double;
       final LatLng point = LatLng(latitude, longitude);
-      // ------------------ Here I am ------------------
-      _iv.wayPoints.add(point);
-      // ------------------ Here I am ------------------
       _iv.distanceNotifier.value = distance.toInt();
+      WalkTrackPoint wtp = WalkTrackPoint(
+          create_date: DateFormat("dd-MM-yyyyTHH:mm:ss").format(
+              DateTime.now()),
+          latitude: map["latitude"]! as double,
+          longitude: map["longitude"]! as double,
+          distance: map["distance"]! as double,
+          provider: "gps",
+          accuracy: map["accuracy"]! as double,
+          elapsed_time: 0);
+      _iv.wayPoints.add(wtp);
 
-      _painter.addWalkTrackPoint(
-          WalkTrackPoint(
-              create_date: DateFormat("dd-MM-yyyyTHH:mm:ss").format(
-                  DateTime.now()),
-              latitude: map["latitude"]! as double,
-              longitude: map["longitude"]! as double,
-              distance: map["distance"]! as double,
-              provider: "gps",
-              accuracy: map["accuracy"]! as double,
-              elapsed_time: 0)
-      );
+      _painter.addWalkTrackPoint(wtp);
       _repaint.notifyListeners();
     } catch (e) {
       writeFile("log.txt","Exception $e");
@@ -1069,12 +1079,8 @@ class DressageCompanionState
   Future<void> loadWalk(var param) async {
 
     final Walk walk = await _iv.db.getWalk(param);
-    for (final WalkTrackPoint wtp in walk.track) {
-      _iv.wayPoints.add(LatLng(wtp.latitude, wtp.longitude));
-    }
-    _painter.addWalkTrackPoints(walk.track);
-    _painter.addWalkImages(walk.images);
-    _painter.addWalkMinuteMarkers(walk.waypoints);
+    _iv.wayPoints = walk.track;
+    _painter.addWalkTrackPoints(walk.track,true);
 
     String localPath = "";
     if (Platform.isAndroid) {
@@ -1117,11 +1123,104 @@ class DressageCompanionState
   }
 
   @override
+  void replayTimerTick(var param) {
+    _iv.msecSinceReplayStart += Constants.REPLAY_TIMER_TICK;
+    if (_iv.firstWalkPoint < _iv.wayPoints.length) {
+      _iv.firstWalkPoint += 1;
+    }
+    if (_iv.firstWalkPoint >= min(10,_iv.wayPoints.length)) {
+      if (_iv.lastWalkPoint < _iv.wayPoints.length) {
+        _iv.lastWalkPoint += 1;
+      } else {
+        _iv.firstWalkPoint       = 1;
+        _iv.lastWalkPoint        = 0;
+      }
+    }
+    List<WalkTrackPoint> p = [];
+    for (int i = _iv.lastWalkPoint; i <= _iv.firstWalkPoint; i++) {
+      p.add(_iv.wayPoints[i]);
+    }
+    print("s ${_iv.firstWalkPoint} e ${_iv.lastWalkPoint} length ${p.length}");
+    _painter.addWalkTrackPoints(p,false);
+    setState(() {});
+  }
+
+  @override
+  void startReplay(var param) {
+    startReplayTimer(null);
+    _iv.msecSinceReplayStart = 0;
+    _iv.firstWalkPoint       = 1;
+    _iv.lastWalkPoint        = 0;
+
+    List<WalkTrackPoint> p = [];
+    for (int i = _iv.lastWalkPoint; i <= _iv.firstWalkPoint; i++) {
+      p.add(_iv.wayPoints[i]);
+    }
+    print("s ${_iv.firstWalkPoint} e ${_iv.lastWalkPoint} length ${p.length}");
+    _painter.addWalkTrackPoints(p,false);
+
+    setState(() {
+      clearButtons();
+      _iv.buttons[0] = simpleButton(Constants.PROMPT_PAUSE, () {
+        _stateEvent.addEventToQueue(Constants.EVENT_PAUSE_REPLAY, null);
+      });
+      _iv.buttons[1] = simpleButton(Constants.PROMPT_STOP_REPLAY, () {
+        _stateEvent.addEventToQueue(Constants.EVENT_STOP_REPLAY, null);
+      });
+    });
+  }
+
+  @override
+  void pauseReplay(var param) {
+    setState(() {
+      clearButtons();
+      _iv.buttons[0] = simpleButton(Constants.PROMPT_RESUME, () {
+        _stateEvent.addEventToQueue(Constants.EVENT_RESUME_REPLAY, null);
+      });
+      _iv.buttons[1] = simpleButton(Constants.PROMPT_STOP_REPLAY, () {
+        _stateEvent.addEventToQueue(Constants.EVENT_STOP_REPLAY, null);
+      });
+    });
+  }
+
+  @override
+  void resumeReplay(var param) {
+    setState(() {
+      clearButtons();
+      _iv.buttons[0] = simpleButton(Constants.PROMPT_PAUSE, () {
+        _stateEvent.addEventToQueue(Constants.EVENT_PAUSE_REPLAY, null);
+      });
+      _iv.buttons[1] = simpleButton(Constants.PROMPT_STOP_REPLAY, () {
+        _stateEvent.addEventToQueue(Constants.EVENT_STOP_REPLAY, null);
+      });
+    });
+  }
+
+  @override
+  void stopReplay(var param) {
+    stopReplayTimer(null);
+    _painter.addWalkTrackPoints(_iv.wayPoints, true);
+  }
+
+  @override
   void setReadyToTrack(var param) {
     setState(() {
       clearButtons();
       _iv.buttons[0] = simpleButton(Constants.PROMPT_START_TRACKING, () {
         _stateEvent.addEventToQueue(Constants.EVENT_START_TRACKING, null);
+      });
+    });
+  }
+
+  @override
+  void setReadyToTrackOrReplay(var param) {
+    setState(() {
+      clearButtons();
+      _iv.buttons[0] = simpleButton(Constants.PROMPT_START_TRACKING, () {
+        _stateEvent.addEventToQueue(Constants.EVENT_START_TRACKING, null);
+      });
+      _iv.buttons[1] = simpleButton(Constants.PROMPT_START_REPLAY, () {
+        _stateEvent.addEventToQueue(Constants.EVENT_START_REPLAY, null);
       });
     });
   }
@@ -1177,8 +1276,8 @@ class DressageCompanionState
 
   @override
   void stopTrackingPressedAction(var param) {
-    const double delay = 3000.0;
-    const int    tick  = 10;
+    const double delay = Constants.STOP_TIMEOUT_DELAY;
+    const int    tick  = Constants.STOP_TIMEOUT_TICK;
     _iv.progressNotifier.value = 0.0;
     _iv.timer = Timer.periodic(
         const Duration(milliseconds: tick), (Timer timer) {

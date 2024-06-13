@@ -39,28 +39,33 @@ class InstanceVars {
   bool uploadTestEnabled   = false;
   bool showProgressBar     = false;
 
-  bool isImageLoaded = false;
+  bool isImageLoaded        = false;
   String landscapeImageFile = "assets/images/CrossCountryLandscape.png";
-  String portraitImageFile = "assets/images/CrossCountryPortrait.png";
-  String imageFile2 = "assets/images/z900.png";
-  String imageFile3 = "assets/images/SaturnV.jpeg";
-  int loadedImage = 1;
+  String portraitImageFile  = "assets/images/CrossCountryPortrait.png";
+  String imageFile2         = "assets/images/z900.png";
+  String imageFile3         = "assets/images/SaturnV.jpeg";
+  int loadedImage           = 1;
 
 // double value              = 0.0;
-  ValueNotifier<int> distanceNotifier = ValueNotifier<int>(0);
+  ValueNotifier<int>    distanceNotifier = ValueNotifier<int>(0);
   ValueNotifier<double> progressNotifier = ValueNotifier<double>(0.0);
 
   late GlobalKey mapKey;
-  List<LatLng> wayPoints = [];
-  LatLng currentPosition = LatLng(-1.0, -1.0);
-  final double zoom = 16;
-  LatLng badminton = LatLng(51.58002, -2.2989);
+  List<WalkTrackPoint> wayPoints = [];
+  LatLng currentPosition         = LatLng(-1.0, -1.0);
+  final double zoom              = 16;
+  LatLng badminton               = LatLng(51.58002, -2.2989);
+
+  int msecSinceReplayStart = 0;
+  int firstWalkPoint       = -1;
+  int lastWalkPoint        = -1;
+
 
 // *** Google Ads ***
   final List<BannerAd> bannerAds = [];
-  int bannerAdIndex = 1;
+  int bannerAdIndex    = 1;
   bool isBannerAdReady = false;
-  bool showBanner = false;
+  bool showBanner      = false;
 
   InstanceVars() {
     DatabaseHelper.getDatabaseHelper().then((DatabaseHelper dbase) {
